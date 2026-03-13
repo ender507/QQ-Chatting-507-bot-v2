@@ -14,6 +14,9 @@ class LLMModel:
     def __init__(self, name, system_prompt):
         self.name = name
         self.system_prompt = system_prompt
+
+    def get_name(self):
+        return self.name
     
     def generate(self, prompt):
         return client.generate(
@@ -23,6 +26,17 @@ class LLMModel:
             prompt = prompt,
         )
 
+    def chat(self, new_message, context):
+        message = [{"role": "system", "content": self.system_prompt}] \
+            + context \
+            + [{"role": "user", "content": new_message}]
+        print("message", message)
+        return client.chat(
+            model = self.name,
+            messages = message,
+            think = env.THINK,
+        )
+    
 cur_model = LLMModel(env.DEFAULT_MODEL, env.DEFAULT_SYSTEM_PROMPT)
 cur_model.default_error_msg = "出错了喵，看看日志喵"
 

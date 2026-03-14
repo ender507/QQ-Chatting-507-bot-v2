@@ -6,12 +6,11 @@ from nonebot.params import CommandArg
 from nonebot.exception import MatcherException
 from nonebot.permission import SUPERUSER
 
-from .ollama_call import chat, env 
+from .ollama_call import chat, internal_call, env
 
 # priority越小优先级越高
 normal_chat = on_command("", priority=10)
 generate = on_command("generate", priority=9)
-think = on_command("think", rule=to_me(), priority=9, permission=SUPERUSER)
 
 @normal_chat.handle()
 async def handle_normal_chat(event: Event, args: Message = CommandArg()):
@@ -28,7 +27,7 @@ async def handle_normal_chat(event: Event, args: Message = CommandArg()):
         raise
     except Exception as e:
         logger.error(e)
-        msg = chat.errorMsg()
+        msg = internal_call.defaultErrorMsg()
         if msg != "":
             await normal_chat.finish(msg)
 
@@ -39,7 +38,7 @@ async def handel_generate(args: Message = CommandArg()):
         if res is None:
             return
         if res.thinking is not None:
-            logger.info(res.thinking)
+            logger.info(res.thinking) # 部分模型在传参think=False的情况下还是会think。总之打出来看看
             if env.THINK:
                 await generate.send(f"思考一下：{res.thinking}")
         await generate.finish(f"{res.response}")
@@ -48,19 +47,6 @@ async def handel_generate(args: Message = CommandArg()):
         raise
     except Exception as e:
         logger.error(e)
-        msg = chat.errorMsg()
+        msg = internal_call.defaultErrorMsg()
         if msg != "":
             await generate.finish(msg)
-
-@think.handle()
-async def hanle_think():
-    try:
-        env.THINK = not env.THINK
-        await think.finish(f"THNIK更新为({env.THINK})")
-    except MatcherException:
-        raise
-    except Exception as e:
-        logger.error(e)
-        msg = chat.errorMsg()
-        if msg != "":
-            await think.finish(msg)

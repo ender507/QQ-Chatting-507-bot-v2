@@ -22,9 +22,6 @@ def chat(user_id, message):
         logger.error(e)
     return None
 
-def errorMsg():
-    return model.cur_model.default_error_msg
-
 if __name__ == "__main__":
     res = generate("你好")
     

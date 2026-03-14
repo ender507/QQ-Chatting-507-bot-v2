@@ -16,7 +16,7 @@ def chat(user_id, message):
         ctx = context.contextManager.get(user_id)
         logger.info(f"context of user({user_id})'s length is: {len(ctx)}")
         res = model.cur_model.chat(message, ctx)
-        context.contextManager.append(user_id, message, res.message.content)
+        context.contextManager.add(user_id, message, res.message.content)
         return res.message
     except Exception as e:
         logger.error(e)
